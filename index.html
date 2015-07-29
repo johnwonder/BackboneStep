@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+ <html>
+     <head>
+          <meta charset="utf-8" />
+        <title>Backbone起步</title>
+		<style>
+		#person{
+			width:200px;
+			height:200px;
+			color:white;
+			background-color:#0055aa;
+		}
+		input{
+			width:300px;
+			height:30px;
+			border-radius:5px;
+		}
+		</style>
+     </head>
+      <body>
+
+	  <div>
+	  <input type="text" id="addStudentIpt" placeholder="在此输入学生姓名"/>
+	  </div>
+ <br/>
+ <div id="studentList">
+
+ </div>
+     <script type="text/javascript" src="jquery-1.8.0.min.js" ></script>
+    <script type="text/javascript" src="underscore-min.js" ></script>
+     <script type="text/javascript" src="backbone-min.js" ></script>
+    
+
+	<script type="text/template" id="person-template">
+	<div class="oneStudent">
+			你好，我叫<%=name%>!
+	</div>
+	</script>
+
+	<script>
+	var Student = Backbone.Model.extend({
+		defaults:{
+			name:"stone"
+		}
+	
+	});
+
+	var Students= Backbone.Collection.extend({
+	
+		model :Student,
+		
+		url:"/task_list"
+	});
+
+	var StudentView = Backbone.View.extend({
+		tagName: 'div class="oneStudent"',
+		template :_.template($("#person-template").html()),
+		initialize:function(){
+		
+		},
+		render:function(){
+			this.$el.html(this.template(this.model.toJSON()));
+			return this;
+		}
+	});
+
+	var AppView = Backbone.View.extend({
+	
+		el:'body',
+		initialize:function(){
+		
+			this.input = this.$("#addStudentIpt");
+			this.studentList = this.$("#studentList");
+
+			this.students = new Students();
+			this.listenTo(this.students,'add',this.showNewStudent);
+
+			this.students.fetch();
+		
+		},
+		events:{
+			"keypress #addStudentIpt":"addStudent"
+		},
+
+		addStudent:function(e){
+			if(e.keyCode == 13){
+			
+				var stdName = this.input.val();
+				this.students.create({name:stdName});
+			}
+		},
+		showNewStudent:function(student){
+			var view = new StudentView({model:student});
+			this.studentList.append(view.render().el);
+		}
+	
+	});
+
+	var view = new AppView;
+	</script>
+     </body>
+ </html>
